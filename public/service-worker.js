@@ -1,16 +1,27 @@
 const FILES_TO_CACHE = [
+  "/",
   "./index.html",
   "./css/styles.css",
   "./js/index.js",
   "./js/idb.js",
   "icons/icon-192x192.png",
 ];
-  const APP_PREFIX = 'Budget-';     
-  const VERSION = 'version_01';
-  const CACHE_NAME = APP_PREFIX + VERSION;
+const APP_PREFIX = 'Budget-';
+const VERSION = 'version_01';
+const CACHE_NAME = APP_PREFIX + VERSION;
 
 
-  // Respond with cached resources
+// Cache resources
+self.addEventListener('install', function (e) {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then(function (cache) {
+      console.log('installing cache : ' + CACHE_NAME)
+      return cache.addAll(FILES_TO_CACHE)
+    }).catch(err => console.log('err', err))
+  )
+})
+
+// Respond with cached resources
 self.addEventListener('fetch', function (e) {
   console.log('fetch request : ' + e.request.url)
   e.respondWith(
@@ -29,15 +40,7 @@ self.addEventListener('fetch', function (e) {
   )
 })
 
-// Cache resources
-self.addEventListener('install', function (e) {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then(function (cache) {
-      console.log('installing cache : ' + CACHE_NAME)
-      return cache.addAll(FILES_TO_CACHE)
-    })
-  )
-})
+
 
 // Delete outdated caches
 self.addEventListener('activate', function (e) {
@@ -53,7 +56,7 @@ self.addEventListener('activate', function (e) {
 
       return Promise.all(keyList.map(function (key, i) {
         if (cacheKeeplist.indexOf(key) === -1) {
-          console.log('deleting cache : ' + keyList[i] );
+          console.log('deleting cache : ' + keyList[i]);
           return caches.delete(keyList[i]);
         }
       }));
